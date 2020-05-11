@@ -3,13 +3,13 @@ import { Application } from "express";
 import express from 'express';
 import { Server as SocketIOServer } from "socket.io";
 import socketIO from 'socket.io';
-// import { createServer} from "http";
-import { createServer, Server as HTTPSServer } from 'https';
+import { createServer, Server as HTTPServer} from "http";
+// import { createServer, Server as HTTPSServer } from 'https';
 import * as path from "path";
 import * as fs from 'fs';
 
 export class Server {
-  private httpsServer: HTTPSServer;
+  private httpServer: HTTPServer;
   private app: Application;
   private io: any;
 
@@ -23,11 +23,8 @@ export class Server {
 
   private initialize(): void {
     this.app = express();
-    this.httpsServer = createServer({
-      key: fs.readFileSync(__dirname +'/server.key'),
-      cert: fs.readFileSync(__dirname+ '/server.cert')
-    }, this.app);
-    this.io = socketIO(this.httpsServer) as any;
+    this.httpServer = createServer(this.app);
+    this.io = socketIO(this.httpServer) as any;
 
     this.configureApp();
     this.configureRoutes();
@@ -105,8 +102,8 @@ export class Server {
   }
 
   public listen(callback: (port: any) => void): void {
-    this.httpsServer.listen(process.env.PORT || this.DEFAULT_PORT, () => {
-      callback(process.env.PORT || this.DEFAULT_PORT);
+    this.httpServer.listen(this.DEFAULT_PORT, () => {
+      callback(this.DEFAULT_PORT);
     });
   }
 }
