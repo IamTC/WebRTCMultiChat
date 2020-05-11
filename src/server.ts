@@ -40,7 +40,7 @@ export class Server {
 
   private configureRoutes(): void {
     this.app.get("/", (req, res) => {
-      res.sendFile("index.html");
+      res.sendFile(__dirname + "/public/index.html");
     });
   }
 
