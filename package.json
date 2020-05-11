@@ -1,0 +1,25 @@
+{
+  "name": "video-chat",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "ts-node src/index.ts",
+    "dev": "nodemon src/index.ts --inspect"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.6",
+    "@types/node": "^13.13.5",
+    "@types/socket.io": "^2.1.4",
+    "nodemon": "^1.19.4",
+    "ts-node": "^8.4.1",
+    "tslint": "^6.1.2",
+    "typescript": "^3.7.2"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "socket.io": "^2.3.0"
+  },
+  "author": "",
+  "license": "ISC"
+}
