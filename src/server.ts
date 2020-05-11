@@ -104,9 +104,9 @@ export class Server {
     });
   }
 
-  public listen(callback: (port: number) => void): void {
-    this.httpsServer.listen(this.DEFAULT_PORT, () => {
-      callback(this.DEFAULT_PORT);
+  public listen(callback: (port: any) => void): void {
+    this.httpsServer.listen(process.env.PORT || this.DEFAULT_PORT, () => {
+      callback(process.env.PORT || this.DEFAULT_PORT);
     });
   }
 }
