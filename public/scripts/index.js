@@ -113,8 +113,7 @@ navigator.getUserMedia(
 );
 
 function init() {
-  const port = prompt('Port: ')
-  const socket = io.connect("localhost:" + port);
+  const socket = io();
   mySocket = socket;
 
   socket.on('connect', () => {
