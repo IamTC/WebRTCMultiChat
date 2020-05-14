@@ -89,6 +89,11 @@ body {
   overflow-y: scroll;
 }
 
+.video-container {
+  display: flex;
+  flex-wrap: wrap;
+}
+
 .talk-info {
   font-weight: 500;
   font-size: 21px;
@@ -96,9 +101,8 @@ body {
 
 .remote-video {
   border: 1px solid #cddfe7;
-  width: 25%;
-  height: 100%;
   box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.2);
+  width: 50%;
 }
 
 .local-video {
@@ -112,6 +116,10 @@ body {
 }
 
 @media screen and (max-width: 700px) {
+  .video-container {
+    display: block;
+  }
+
   .remote-video {
     width: 100%;
   }
