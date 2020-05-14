@@ -78,7 +78,7 @@ function init() {
       if (!connections[socketListId]) {
         connections[socketListId] = new RTCPeerConnection(peerConnectionConfig);
         //Wait for their ice candidate       
-        connections[socketListId].onicecandidate = function () {
+        connections[socketListId].onicecandidate = function (event) {
           if (event.candidate != null) {
             console.log('SENDING ICE');
             socket.emit('signal', socketListId, JSON.stringify({ 'ice': event.candidate }));
@@ -86,7 +86,7 @@ function init() {
         }
 
         //Wait for their video stream
-        connections[socketListId].onaddstream = function () {
+        connections[socketListId].onaddstream = function (event) {
           gotRemoteStream(event, socketListId)
         }
 
