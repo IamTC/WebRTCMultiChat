@@ -1,7 +1,7 @@
 body {
   margin: 0;
   padding: 0;
-  /* font-family: "Montserrat", sans-serif; */
+  font-family: "Montserrat", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: #f9fafc;
@@ -28,18 +28,24 @@ body {
 .header > .logo-container > .logo-text {
   font-size: 26px;
   font-weight: 700;
+  background: black;
+  padding: 0 10px;
+  color: #fff;
 }
 
 .header > .logo-container > .logo-text > .logo-highlight {
-  color: #65a9e5;
+  display: inline-block;
+  background: darkorange;
+  border-radius: 5px;
+  padding: 0 5px;
+  color: #000;
+  margin-left: 6px;
 }
 
 .content-container {
   width: 100%;
-  height: calc(100vh - 89px);
   display: flex;
   justify-content: space-between;
-  overflow: hidden;
 }
 
 .active-users-panel {
@@ -80,6 +86,7 @@ body {
   padding: 0 20px;
   flex: 1;
   position: relative;
+  overflow-y: scroll;
 }
 
 .talk-info {
@@ -95,11 +102,20 @@ body {
 }
 
 .local-video {
-  position: absolute;
+  position: fixed;
   border: 1px solid #cddfe7;
-  bottom: 60px;
-  right: 40px;
+  bottom: 0;
+  right: 0;
   box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.2);
   border-radius: 5px;
-  width: 300px;
+  width: 30vw;
+}
+
+@media screen and (max-width: 700px) {
+  .remote-video {
+    width: 100%;
+  }
+  .local-video {
+    width: 42vw;
+  }
 }

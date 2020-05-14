@@ -3,7 +3,7 @@ import { Application } from "express";
 import express from 'express';
 import { Server as SocketIOServer } from "socket.io";
 import socketIO from 'socket.io';
-import { createServer, Server as HTTPServer} from "http";
+import { createServer, Server as HTTPServer } from "http";
 // import { createServer, Server as HTTPSServer } from 'https';
 import * as path from "path";
 import * as fs from 'fs';
@@ -70,26 +70,6 @@ export class Server {
         socket.to(toId).emit('signal', socket.id, message);
       });
 
-      socket.on("call-user", (data: any) => {
-        socket.to(data.to).emit("call-made", {
-          offer: data.offer,
-          socket: socket.id
-        });
-      });
-
-      socket.on("make-answer", data => {
-        socket.to(data.to).emit("answer-made", {
-          socket: socket.id,
-          answer: data.answer
-        });
-      });
-
-      socket.on("reject-call", data => {
-        socket.to(data.from).emit("call-rejected", {
-          socket: socket.id
-        });
-      });
-
       socket.on("disconnect", () => {
         this.activeSockets = this.activeSockets.filter(
           existingSocket => existingSocket !== socket.id
@@ -98,6 +78,7 @@ export class Server {
           socketId: socket.id
         });
       });
+
     });
   }
 
