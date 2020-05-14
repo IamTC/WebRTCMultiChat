@@ -5,8 +5,13 @@ let connections = [];
 let locVdo;
 const peerConnectionConfig = {
   'iceServers': [
-    { 'urls': 'stun:stun.services.mozilla.com' },
-    { 'urls': 'stun:stun.l.google.com:19302' },
+    // { 'url': 'stun:stun.services.mozilla.com' },
+    // { 'url': 'stun:stun.l.google.com:19302' },
+    { 
+      'url': 'turn:157.245.149.157:3478?transport=udp',
+      'username': 't2mrnd',
+      'credential':'t2mrnd.online'
+    }
   ]
 };
 
@@ -167,8 +172,8 @@ function init() {
     }
   });
 
-  socket.on('signal',(id, message) => {
-    gotMessageFromServer(id,message);
+  socket.on('signal', (id, message) => {
+    gotMessageFromServer(id, message);
   });
 
   socket.on("call-made", async data => {
