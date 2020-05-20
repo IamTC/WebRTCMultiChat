@@ -44,41 +44,27 @@ export class Server {
   private handleSocketConnection(): void {
     this.io.on("connection", socket => {
 
-      this.io.sockets.emit("user-joined", socket.id, this.io.engine.clientsCount, Object.keys(this.io.sockets.clients().sockets));
+      let room;
 
-      // New user joins
-      const existingSocket = this.activeSockets.find(
-        existingSocket => existingSocket === socket.id
-      );
+      socket.on('joinedRoom', (roomId) => {
+        socket.join(roomId);
+        room = roomId;
 
-      // if new user
-      if (!existingSocket) {
-        this.activeSockets.push(socket.id);
+        this.io.of('/').in(room).clients((error, clients) => {
+          if (error) throw error;
 
-        socket.emit("update-user-list", {
-          users: this.activeSockets.filter(
-            existingSocket => existingSocket !== socket.id
-          )
+          this.io.sockets.in(room).emit("user-joined", socket.id, clients.length, clients);
         });
 
-        socket.broadcast.emit("update-user-list", {
-          users: [socket.id]
-        });
-      }
+      })
 
       socket.on('signal', (toId, message) => {
-        socket.to(toId).emit('signal', socket.id, message);
+        this.io.to(toId).emit('signal', socket.id, message);
       });
 
-      socket.on("disconnect", () => {
-        this.activeSockets = this.activeSockets.filter(
-          existingSocket => existingSocket !== socket.id
-        );
-        socket.broadcast.emit("remove-user", {
-          socketId: socket.id
-        });
-      });
-
+      socket.on('disconnect', () => {
+        this.io.sockets.in(room).emit('remove-user', socket.id);
+      })
     });
   }
 

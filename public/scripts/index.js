@@ -19,26 +19,47 @@ const existingCalls = [];
 
 const { RTCPeerConnection, RTCSessionDescription } = window;
 
-const peerConnection = new RTCPeerConnection();
+const createRoomBtn = document.getElementById('btnCreateRoom');
+const joinRoomBtn = document.getElementById('btnJoinRoom');
 
-function updateUserList(socketIds, id, count) {
-  socketIds.forEach(socketId => {
-    if (!connections[socketId]) {
-      connections[socketId] = new RTCPeerConnection(peerConnectionConfig);
-      connections[socketId].onicecandidate = (event) => {
+createRoomBtn.addEventListener('click', () => {
+  const roomID = prompt('Enter room identifier');
+  init(roomID);
+  createRoomBtn.hidden = true
+  joinRoomBtn.hidden = true;
+})
+
+joinRoomBtn.addEventListener('click', () => {
+  const roomId = prompt('Enter room identifier');
+  init(roomId);
+  createRoomBtn.hidden = true
+  joinRoomBtn.hidden = true;
+});
+
+function updateUserList(clients, id, count) {
+  clients.forEach((socketListId) => {
+    if (!connections[socketListId]) {
+      connections[socketListId] = new RTCPeerConnection(peerConnectionConfig);
+      //Wait for their ice candidate       
+      connections[socketListId].onicecandidate = (event) => {
         if (event.candidate != null) {
           console.log('SENDING ICE');
-          mySocket.emit('signal', socketId, JSON.stringify({ ice: event.candidate }));
+          mySocket.emit('signal', socketListId, JSON.stringify({ 'ice': event.candidate }));
         }
       }
 
-      connections[socketId].onaddstream = (event) => {
-        gotRemoteStream(event, socketId);
+      //Wait for their video stream
+      connections[socketListId].onaddstream = (event) => {
+        gotRemoteStream(event, socketListId)
       }
 
-      connections[socketId].addStream(locVdo);
+      //Add the local video stream
+      connections[socketListId].addStream(locVdo);
     }
   });
+
+  //Create an offer to connect with your local description
+
   if (count >= 2) {
     connections[id].createOffer().then(function (description) {
       connections[id].setLocalDescription(description).then(function () {
@@ -56,72 +77,48 @@ navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(
       localVideo.srcObject = stream;
     }
     locVdo = stream;
-
-    stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
-    init();
   },
   error => {
     console.warn(error.message);
   }
 )
 
-function init() {
-  const socket = io();
-  mySocket = socket;
+function init(roomId) {
+  if (!mySocket || !mySocket.connected) {
+    const socket = io();
+    mySocket = socket;
 
-  socket.on("update-user-list", ({ users, id, count }) => {
-    updateUserList(users, id, count);
-  });
+    socket.emit('joinedRoom', roomId);
 
-  socket.on('user-joined', function (id, count, clients) {
-    clients.forEach(function (socketListId) {
-      if (!connections[socketListId]) {
-        connections[socketListId] = new RTCPeerConnection(peerConnectionConfig);
-        //Wait for their ice candidate       
-        connections[socketListId].onicecandidate = function (event) {
-          if (event.candidate != null) {
-            console.log('SENDING ICE');
-            socket.emit('signal', socketListId, JSON.stringify({ 'ice': event.candidate }));
-          }
-        }
-
-        //Wait for their video stream
-        connections[socketListId].onaddstream = function (event) {
-          gotRemoteStream(event, socketListId)
-        }
-
-        //Add the local video stream
-        connections[socketListId].addStream(locVdo);
-      }
+    socket.on('signal', (id, message) => {
+      gotMessageFromServer(id, message);
     });
 
-    //Create an offer to connect with your local description
-    if (count >= 2) {
-      connections[id].createOffer().then(function (description) {
-        connections[id].setLocalDescription(description).then(function () {
-          // console.log(connections);
-          socket.emit('signal', id, JSON.stringify({ 'sdp': connections[id].localDescription }));
-        }).catch(e => console.log(e));
+    socket.on('connect', () => {
+
+      socket.on("user-joined", (id, count, clients) => {
+        updateUserList(clients, id, count);
       });
-    }
-  });
 
-  socket.on('signal', (id, message) => {
-    gotMessageFromServer(id, message);
-  });
 
-  socket.on('remove-user', (id) => {
-    const vidEl = document.querySelector(`[data-socket='${id.socketId}']`)
-    vidEl.parentNode.removeChild(vidEl);
-  })
-
-  peerConnection.ontrack = function ({ streams: [stream] }) {
-    const remoteVideo = document.getElementById("remote-video");
-    if (remoteVideo) {
-      remoteVideo.srcObject = stream;
-    }
-  };
-
+      socket.on('remove-user', (socketId) => {
+        if (connections[socketId]) {
+          connections[socketId].close();
+          delete connections[socketId];
+          if (Object.keys(connections).length < 2) {
+            Object.keys(connections).forEach(key => {
+              connections[key].close();
+              delete connections[key];
+            })
+          }
+          const vidEl = document.querySelector(`[data-socket='${socketId}']`)
+          if (vidEl) {
+            vidEl.parentNode.removeChild(vidEl);
+          }
+        }
+      })
+    });
+  }
 }
 
 function gotRemoteStream(event, id) {
@@ -146,7 +143,7 @@ function gotMessageFromServer(fromId, message) {
   var signal = JSON.parse(message)
 
   //Make sure it's not coming from yourself
-  if (fromId != mySocket.socketId) {
+  if (fromId != mySocket.id) {
 
     if (signal.sdp) {
       connections[fromId].setRemoteDescription(new RTCSessionDescription(signal.sdp)).then(function () {

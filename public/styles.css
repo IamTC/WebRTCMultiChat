@@ -115,6 +115,10 @@ body {
   width: 30vw;
 }
 
+.room-actions {
+  margin-left: auto;
+}
+
 @media screen and (max-width: 700px) {
   .video-container {
     display: block;
