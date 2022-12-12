@@ -16,7 +16,7 @@
     "nodemon": "^1.19.4",    
     "tslint": "^6.1.2",
     "ts-node": "^8.4.1",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "socket.io": "^2.3.0",
     "typescript": "^3.7.2"
   },
